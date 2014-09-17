@@ -6,7 +6,7 @@
 
 * Creation Date : 09-16-2014
 
-* Last Modified : Wed 17 Sep 2014 12:21:22 AM UTC
+* Last Modified : Wed 17 Sep 2014 12:28:32 AM UTC
 
 * Created By : Kiyor
 
@@ -55,7 +55,7 @@ func main() {
 			ch <- r
 		}(r)
 	}
-	t := time.Tick(time.Second * 5)
+	t := time.Tick(time.Second * 20)
 	for i := 0; i < len(reslovs); i++ {
 		select {
 		case r := <-ch:
