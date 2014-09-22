@@ -6,7 +6,7 @@
 
 * Creation Date : 09-16-2014
 
-* Last Modified : Thu 18 Sep 2014 07:54:05 PM UTC
+* Last Modified : Thu 18 Sep 2014 09:04:45 PM UTC
 
 * Created By : Kiyor
 
@@ -31,13 +31,12 @@ import (
 )
 
 type reslov struct {
-	note   string
-	file   string
-	init   bool
-	u      *unbound.Unbound
-	res    string
-	tstart time.Time
-	tend   time.Time
+	note string
+	file string
+	init bool
+	u    *unbound.Unbound
+	res  string
+	dur  time.Duration
 }
 
 var (
@@ -62,12 +61,12 @@ func main() {
 	ch := make(chan reslov)
 	for _, r := range reslovs {
 		go func(r reslov) {
-			r.tstart = time.Now()
+			tstart := time.Now()
 			r.u = unbound.New()
 			defer r.u.Destroy()
 			r.u.ResolvConf(r.file)
 			r.digger(domain)
-			r.tend = time.Now()
+			r.dur = time.Now().Sub(tstart)
 			ch <- r
 		}(r)
 	}
@@ -75,7 +74,7 @@ func main() {
 	for i := 0; i < len(reslovs); i++ {
 		select {
 		case r := <-ch:
-			color.Printf("@{r}DIG@{|}   @{g}%s@{|} in @{g}%s@{|} using @{y}%v@{|}\n", domain, strings.ToUpper(r.note), r.tend.Sub(r.tstart))
+			color.Printf("@{r}DIG@{|}   @{g}%s@{|} in @{g}%s@{|} using @{y}%v@{|}\n", domain, strings.ToUpper(r.note), r.dur)
 			fmt.Println(r.res)
 		case <-t:
 		}
