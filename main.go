@@ -6,7 +6,7 @@
 
 * Creation Date : 09-16-2014
 
-* Last Modified : Tue 23 Sep 2014 01:08:08 AM UTC
+* Last Modified : Mon 15 Dec 2014 07:35:23 PM UTC
 
 * Created By : Kiyor
 
@@ -110,12 +110,6 @@ func (r *reslov) digger(domain string) {
 		wg.Add(1)
 		go func(a1 string, r *reslov) {
 			var w sync.WaitGroup
-			var loc ipLoc
-			w.Add(1)
-			go func(a1 string, loc *ipLoc) {
-				loc.ip2loc(a1)
-				w.Done()
-			}(a1, &loc)
 			if doChk {
 				w.Add(1)
 				go func(a1 string) {
@@ -126,18 +120,16 @@ func (r *reslov) digger(domain string) {
 			w.Wait()
 			if doChk {
 				if checkres[a1].code < 500 {
-					r.res += color.Sprintf("@{c}A@{|}     %-18s %s %s @{g}[%d]@{|} %v\n", a1, loc.CountryCode, loc.City, checkres[a1].code, checkres[a1].header)
+					r.res += color.Sprintf("@{c}A@{|}     %-18s @{g}[%d]@{|} %v\n", a1, checkres[a1].code, checkres[a1].header)
 				} else {
-					r.res += color.Sprintf("@{c}A@{|}     %-18s %s %s @{r}[%d]@{|} %v\n", a1, loc.CountryCode, loc.City, checkres[a1].code, checkres[a1].header)
+					r.res += color.Sprintf("@{c}A@{|}     %-18s @{r}[%d]@{|} %v\n", a1, checkres[a1].code, checkres[a1].header)
 				}
 			} else {
-				r.res += color.Sprintf("@{c}A@{|}     %-18s %s %s\n", a1, loc.CountryCode, loc.City)
+				r.res += color.Sprintf("@{c}A@{|}     %-18s\n", a1)
 			}
-			// 		r.writeHost("cctest1.youbibi.com", a1)
 			wg.Done()
 		}(a1, r)
 	}
-	// 	fmt.Println(checkres)
 	wg.Wait()
 }
 
