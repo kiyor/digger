@@ -6,7 +6,7 @@
 
 - Creation Date : 12-15-2014
 
-- Last Modified : Mon 15 Dec 2014 07:42:14 PM UTC
+- Last Modified : Wed 17 Dec 2014 11:54:11 PM UTC
 
 - Created By : Kiyor
 
@@ -16,8 +16,16 @@
 
 ##	How to use
 
+###	this require unbound installed in system
+
+-	in centos, please install `unbound` `unbound-libs` `unbound-devel`
+-	in OSX, please run `osx_install.sh`
+
 ```bash
 
+go get -u github.com/kiyor/digger
+go install github.com/kiyor/digger
+cd ${GOPATH}/src/github.com/kiyor/digger
 sudo cp -R ./reslov /usr/local/etc/
 digger google.com
 
