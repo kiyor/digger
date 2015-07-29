@@ -30,7 +30,7 @@ var (
 	checkres map[string]check
 )
 
-func (r *reslov) headerCheck(url, ip string) {
+func (r *resolv) headerCheck(url, ip string) {
 	if _, ok := checkres[ip]; ok {
 		return
 	}
