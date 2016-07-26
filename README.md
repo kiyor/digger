@@ -6,7 +6,7 @@
 
 - Creation Date : 12-15-2014
 
-- Last Modified : Wed 17 Dec 2014 11:54:11 PM UTC
+- Last Modified : Tue 26 Jul 2016 12:00:16 PM PDT
 
 - Created By : Kiyor
 
@@ -38,4 +38,4 @@ digger google.com
 ##	Option
 
 -	use digger and [ip2loc](https://github.com/kiyor/ip2loc) will help you a lot
--	change or add `/usr/local/etc/reslov/xxx.conf` if you need
+-	change or add `/usr/local/etc/resolv/xxx.conf` if you need
