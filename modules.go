@@ -6,7 +6,7 @@
 
 * Creation Date : 09-22-2014
 
-* Last Modified : Mon 15 Dec 2014 07:35:53 PM UTC
+* Last Modified : Tue 26 Jul 2016 11:46:14 AM PDT
 
 * Created By : Kiyor
 
@@ -30,7 +30,7 @@ var (
 	checkres map[string]check
 )
 
-func (r *reslov) headerCheck(url, ip string) {
+func (r *resolv) headerCheck(url, ip string) {
 	if _, ok := checkres[ip]; ok {
 		return
 	}

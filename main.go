@@ -6,7 +6,7 @@
 
 * Creation Date : 09-16-2014
 
-* Last Modified : Mon 15 Dec 2014 07:35:23 PM UTC
+* Last Modified : Tue 26 Jul 2016 11:53:14 AM PDT
 
 * Created By : Kiyor
 
@@ -15,6 +15,7 @@ _._._._._._._._._._._._._._._._._._._._._.*/
 package main
 
 import (
+	"flag"
 	"fmt"
 	"github.com/miekg/unbound"
 	"github.com/wsxiaoys/terminal/color"
@@ -28,7 +29,7 @@ import (
 	"time"
 )
 
-type reslov struct {
+type resolv struct {
 	note string
 	file string
 	init bool
@@ -39,25 +40,19 @@ type reslov struct {
 
 var (
 	domain   string
-	url      string
-	doChk    bool
 	reDomain = regexp.MustCompile(`([a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,6})`)
+
+	dir *string = flag.String("d", "/usr/local/etc/resolv", "use custom directory of resolv")
 )
 
 func init() {
+	flag.Parse()
 	runtime.GOMAXPROCS(runtime.NumCPU())
-	if len(os.Args) == 1 {
-		fmt.Println("use digger domain.com")
+	if len(flag.Args()) == 0 {
+		fmt.Println(os.Args[0], "[options] domain.com")
 		os.Exit(1)
 	}
-	if len(os.Args) == 2 {
-		doChk = false
-	}
-	if len(os.Args) == 3 {
-		doChk = true
-		url = os.Args[2]
-	}
-	domain = os.Args[1]
+	domain = flag.Arg(0)
 	if reDomain.MatchString(domain) {
 		val := reDomain.FindStringSubmatch(domain)
 		domain = val[0]
@@ -66,10 +61,10 @@ func init() {
 }
 
 func main() {
-	reslovs := getReslovs("/usr/local/etc/reslov/")
-	ch := make(chan reslov)
-	for _, r := range reslovs {
-		go func(r reslov) {
+	resolvs := getResolvs(*dir)
+	ch := make(chan resolv)
+	for _, r := range resolvs {
+		go func(r resolv) {
 			tstart := time.Now()
 			r.u = unbound.New()
 			defer r.u.Destroy()
@@ -80,7 +75,7 @@ func main() {
 		}(r)
 	}
 	t := time.Tick(time.Second * 100)
-	for i := 0; i < len(reslovs); i++ {
+	for i := 0; i < len(resolvs); i++ {
 		select {
 		case r := <-ch:
 			color.Printf("@{r}DIG@{|}   @{g}%s@{|} in @{g}%s@{|} using @{y}%v@{|}\n", domain, strings.ToUpper(r.note), r.dur)
@@ -90,7 +85,7 @@ func main() {
 	}
 }
 
-func (r *reslov) digger(domain string) {
+func (r *resolv) digger(domain string) {
 	cname, err := r.u.LookupCNAME(domain)
 	if err != nil {
 		log.Fatalf("error %s\n", err.Error())
@@ -108,32 +103,15 @@ func (r *reslov) digger(domain string) {
 	var wg sync.WaitGroup
 	for _, a1 := range a {
 		wg.Add(1)
-		go func(a1 string, r *reslov) {
-			var w sync.WaitGroup
-			if doChk {
-				w.Add(1)
-				go func(a1 string) {
-					r.headerCheck(url, a1)
-					w.Done()
-				}(a1)
-			}
-			w.Wait()
-			if doChk {
-				if checkres[a1].code < 500 {
-					r.res += color.Sprintf("@{c}A@{|}     %-18s @{g}[%d]@{|} %v\n", a1, checkres[a1].code, checkres[a1].header)
-				} else {
-					r.res += color.Sprintf("@{c}A@{|}     %-18s @{r}[%d]@{|} %v\n", a1, checkres[a1].code, checkres[a1].header)
-				}
-			} else {
-				r.res += color.Sprintf("@{c}A@{|}     %-18s\n", a1)
-			}
+		go func(a1 string, r *resolv) {
+			r.res += color.Sprintf("@{c}A@{|}     %-18s\n", a1)
 			wg.Done()
 		}(a1, r)
 	}
 	wg.Wait()
 }
 
-func getReslovs(dir string) (rs []reslov) {
+func getResolvs(dir string) (rs []resolv) {
 	filepath.Walk(dir, func(path string, _ os.FileInfo, _ error) error {
 		defer func() {
 			if r := recover(); r != nil {
@@ -144,7 +122,7 @@ func getReslovs(dir string) (rs []reslov) {
 		if info.IsDir() || err != nil {
 			return nil
 		}
-		var r reslov
+		var r resolv
 		r.file = path
 		r.note = strings.Split(info.Name(), ".")[0]
 		r.init = true
